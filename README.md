@@ -1,0 +1,19 @@
+FROM GITREVERSE
+
+Build me a minimalist 32-bit x86 hobby kernel from scratch. I want it to boot via GRUB using the Multiboot 1.x protocol, run in protected mode, and drop into an interactive command-line shell. The whole thing should be written in x86 NASM assembly for the low-level boot and interrupt stubs, and C (gnu99, freestanding, no libc) for all the kernel logic. Cross-compile everything for i686-elf, link with a custom linker script that puts the entry point at 0x100000, and package the result as a bootable ISO using grub-mkrescue. It should run cleanly under qemu-system-i386.
+
+The boot sequence works like this: GRUB loads the kernel, jumps to the assembly entry point, sets up a 16 KB stack in BSS, pushes the Multiboot magic value and info pointer, then calls into kernel_main. That function initializes everything in order: GDT first, then IDT (which also remaps the PIC), then keyboard, then the physical memory manager. It validates the Multiboot magic and prints colored status messages during boot, then falls into the shell REPL.
+
+For protected mode setup, implement a flat 32-bit GDT with three descriptors: null, kernel code at selector 0x08, and kernel data at 0x10. Both have base 0, limit 4 GB, ring 0 only. The IDT needs 256 entries covering all CPU exception vectors and hardware IRQs. Remap the 8259A PIC so IRQ0–15 land at interrupts 32–47 to avoid colliding with CPU exceptions. After loading the IDT, enable interrupts with sti.
+
+The interrupt handling works in two paths. CPU exceptions (0–31) print the exception name and halt forever, no recovery. Hardware IRQs (32–47) send EOI to the PIC after handling. For slave PIC IRQs (40–47), send EOI to both master and slave. Only IRQ1 (keyboard) needs an actual handler right now; everything else can be a no-op that just sends EOI. The assembly stubs should preserve all registers with pusha and push the segment registers before calling into the C dispatcher.
+
+VGA text output goes directly to 0xB8000. Support an 80x25 display with 16-color foreground/background pairs encoded as the high byte of each 16-bit character cell. Handle newlines, backspace, and scrolling when the cursor hits the bottom row.
+
+The PS/2 keyboard driver reads scancodes from port 0x60, maps them through a 128-entry lookup table to ASCII, and ignores key-release events (scancode >= 0x80). Characters get handed off to the shell input buffer, not printed directly.
+
+The shell is a blocking REPL. It halts with hlt waiting for the keyboard IRQ to wake it, echoes characters as they come in, handles backspace, and dispatches on Enter. Cap the input buffer at 256 characters and silently drop anything beyond that. Backspace at position zero should be a safe no-op. Support these built-in commands: help, clear, echo, and meminfo. Unknown commands print a friendly error with a hint to type help.
+
+The physical memory manager is a bitmap allocator, one bit per 4 KB page, supporting up to 128 MB (32768 pages, 1024 u32 entries in the bitmap). Parse the Multiboot memory map to mark available regions free. Always mark page 0 as used for null pointer protection, and mark the pages covering the kernel (roughly 0x100000–0x200000) as reserved so nothing overwrites it. pmm_alloc_page returns the address of the first free page or null if exhausted. pmm_free_page marks a page free. Track total and used page counts so meminfo can report KB-level stats.
+
+A few edge cases to get right: backspace at the start of input does nothing. Buffer overflow at 256 chars drops silently. Out-of-memory from the PMM returns null without panicking. Double faults and page faults just print and halt like any other exception. Unhandled IRQs get EOI and nothing else. The GDT and IDT sizes (3 and 256 entries) are compile-time constants. No floating point, no paging, no user mode, no filesystem, no malloc beyond the page allocator, no libc at all.
