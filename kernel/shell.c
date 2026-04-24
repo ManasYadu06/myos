@@ -16,6 +16,17 @@ static uint32_t buf_pos;
 /* -----------------------------------------------------------------------
  * String helpers — no libc available
  * ----------------------------------------------------------------------- */
+
+static void vga_print_num(uint32_t n) {
+    char buf[12];
+    int i = 0;
+    if (n == 0) { vga_putchar('0'); return; }
+    while (n) { buf[i++] = '0' + (n % 10); n /= 10; }
+    while (i--) vga_putchar(buf[i]);
+}
+
+
+
 static int sh_strcmp(const char *a, const char *b) {
     while (*a && *b && *a == *b) { a++; b++; }
     return *a - *b;
@@ -73,11 +84,11 @@ static void cmd_meminfo(void) {
     uint32_t total = pmm_total_pages() * 4;
     // print free/total KB — use your existing print_num helper or vga_print
     vga_print("Total : ");
-    vga_print_num(total_kb);
+    vga_print_num(total);
     vga_print(" KB\nFree  : ");
-    vga_print_num(free_kb);
+    vga_print_num(free);
     vga_print(" KB\nUsed  : ");
-    vga_print_num(total_kb - free_kb);
+    vga_print_num(total - free);
     vga_print(" KB\n");
 }
 
@@ -160,13 +171,6 @@ void shell_input(char c) {
 }
 
 
-static void vga_print_num(uint32_t n) {
-    char buf[12];
-    int i = 0;
-    if (n == 0) { vga_putchar('0'); return; }
-    while (n) { buf[i++] = '0' + (n % 10); n /= 10; }
-    while (i--) vga_putchar(buf[i]);
-}
 
 /* -----------------------------------------------------------------------
  * shell_run — the read-eval-print loop
