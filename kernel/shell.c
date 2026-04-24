@@ -1,6 +1,7 @@
 #include "shell.h"
 #include "vga.h"
 #include "keyboard.h"
+#include "pmm.h"
 
 #define BUF_SIZE 256
 
@@ -68,9 +69,16 @@ static void cmd_echo(const char *args) {
 }
 
 static void cmd_meminfo(void) {
-    vga_set_color(VGA_LIGHT_GREY, VGA_BLACK);
-    vga_print("Memory manager not yet initialized.\n");
-    vga_print("Phase 5 will add physical memory tracking.\n");
+    uint32_t free  = pmm_free_pages()  * 4;
+    uint32_t total = pmm_total_pages() * 4;
+    // print free/total KB — use your existing print_num helper or vga_print
+    vga_print("Total : ");
+    vga_print_num(total_kb);
+    vga_print(" KB\nFree  : ");
+    vga_print_num(free_kb);
+    vga_print(" KB\nUsed  : ");
+    vga_print_num(total_kb - free_kb);
+    vga_print(" KB\n");
 }
 
 /* -----------------------------------------------------------------------
@@ -149,6 +157,15 @@ void shell_input(char c) {
             vga_putchar(c);   /* echo to screen */
         }
     }
+}
+
+
+static void vga_print_num(uint32_t n) {
+    char buf[12];
+    int i = 0;
+    if (n == 0) { vga_putchar('0'); return; }
+    while (n) { buf[i++] = '0' + (n % 10); n /= 10; }
+    while (i--) vga_putchar(buf[i]);
 }
 
 /* -----------------------------------------------------------------------
