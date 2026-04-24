@@ -2,6 +2,7 @@
 #include "gdt.h"
 #include "idt.h"
 #include "keyboard.h"
+#include "shell.h"
 
 void kernel_main(unsigned int magic, unsigned int mb_info) {
     (void)mb_info;
@@ -44,5 +45,5 @@ void kernel_main(unsigned int magic, unsigned int mb_info) {
     vga_set_color(VGA_LIGHT_GREY, VGA_BLACK);
     vga_print("\nMyOS> ");
 
-    for (;;) __asm__ volatile("hlt");
+    shell_run();
 }
