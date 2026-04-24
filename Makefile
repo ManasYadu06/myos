@@ -13,7 +13,8 @@ OBJS    = boot/boot.o       \
           kernel/gdt.o      \
           kernel/idt.o      \
           kernel/isr.o      \
-          kernel/keyboard.o
+          kernel/keyboard.o \
+          kernel/shell.o
 
 .PHONY: all clean run iso
 
