@@ -4,6 +4,8 @@
 #include "keyboard.h"
 #include "shell.h"
 #include "pmm.h"
+#include "vmm.h"
+
 
 void kernel_main(unsigned int magic, unsigned int mb_info) {
     (void)mb_info;
@@ -37,6 +39,9 @@ void kernel_main(unsigned int magic, unsigned int mb_info) {
 
     pmm_init(mb_info);
     vga_print("[OK] Memory manager ready\n");
+
+    vmm_init();
+    vga_print("[OK] Paging enabled\n");
 
     /* Multiboot magic check */
     if (magic == 0x2BADB002)
