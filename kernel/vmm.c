@@ -94,7 +94,7 @@ int vmm_is_mapped(uint32_t virt) {
  * ----------------------------------------------------------------------- */
 void vmm_init(void) {
     /* identity map first 4MB — 1024 pages of 4KB each */
-    for (uint32_t i = 0; i < 1024; i++)
+    for (uint32_t i = 0; i < 1088; i++)
         vmm_map_page(i * 0x1000, i * 0x1000, PAGE_PRESENT | PAGE_WRITABLE);
 
     /* load page directory into CR3 (PDBR register) */

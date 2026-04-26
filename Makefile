@@ -17,7 +17,8 @@ OBJS    = boot/boot.o       \
           kernel/shell.o    \
           kernel/pmm.o      \
           kernel/vmm.o      \
-          kernel/pit.o
+          kernel/pit.o      \
+          kernel/heap.o
 
 
 .PHONY: all clean run iso

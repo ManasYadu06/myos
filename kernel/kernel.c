@@ -5,6 +5,7 @@
 #include "shell.h"
 #include "pmm.h"
 #include "vmm.h"
+#include "heap.h"
 
 
 void kernel_main(unsigned int magic, unsigned int mb_info) {
@@ -45,6 +46,9 @@ void kernel_main(unsigned int magic, unsigned int mb_info) {
 
     vmm_init();
     vga_print("[OK] Paging enabled\n");
+
+    heap_init();
+    vga_print("[OK] Kernel heap ready\n");
 
     /* Multiboot magic check */
     if (magic == 0x2BADB002)

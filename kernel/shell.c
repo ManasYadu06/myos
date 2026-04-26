@@ -3,6 +3,8 @@
 #include "keyboard.h"
 #include "pmm.h"
 #include "pit.h"
+#include "heap.h"
+
 
 #define BUF_SIZE 256
 
@@ -71,6 +73,10 @@ static void cmd_help(void) {
     vga_print("  uptime  ");
     vga_set_color(VGA_LIGHT_GREY, VGA_BLACK);
     vga_print("-- show time since boot\n");
+    vga_set_color(VGA_LIGHT_CYAN, VGA_BLACK);
+    vga_print("  heapinfo");
+    vga_set_color(VGA_LIGHT_GREY, VGA_BLACK);
+    vga_print("-- show kernel heap stats\n");
 }
 
 static void cmd_clear(void) {
@@ -97,7 +103,15 @@ static void cmd_uptime(void) {
     vga_print(" ticks)\n");
 }
 
-
+static void cmd_heapinfo(void) {
+    uint32_t fb, ub, fblk, ublk;
+    heap_stats(&fb, &ub, &fblk, &ublk);
+    vga_print("Heap free  : "); vga_print_num(fb);   vga_print(" B (");
+    vga_print_num(fblk); vga_print(" blocks)\n");
+    vga_print("Heap used  : "); vga_print_num(ub);   vga_print(" B (");
+    vga_print_num(ublk); vga_print(" blocks)\n");
+    vga_print("Heap total : "); vga_print_num(fb+ub); vga_print(" B\n");
+}
 
 static void cmd_meminfo(void) {
     uint32_t free  = pmm_free_pages()  * 4;
@@ -144,6 +158,8 @@ static void parse_and_exec(void) {
         cmd_meminfo();
     else if (sh_strncmp(cmd, "uptime",  cmd_len) == 0 && cmd_len == 6)
         cmd_uptime();
+    else if (sh_strncmp(cmd, "heapinfo", cmd_len) == 0 && cmd_len == 8)
+        cmd_heapinfo();
     else {
         /* unknown command */
         vga_set_color(VGA_LIGHT_RED, VGA_BLACK);
