@@ -37,6 +37,9 @@ void kernel_main(unsigned int magic, unsigned int mb_info) {
     keyboard_init();
     vga_print("[OK] Keyboard ready\n");
 
+    pit_init();
+    vga_print("[OK] PIT timer ready\n");
+
     pmm_init(mb_info);
     vga_print("[OK] Memory manager ready\n");
 

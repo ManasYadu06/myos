@@ -2,6 +2,7 @@
 #include "vga.h"
 #include "keyboard.h"
 #include "pmm.h"
+#include "pit.h"
 
 #define BUF_SIZE 256
 
@@ -66,6 +67,10 @@ static void cmd_help(void) {
     vga_print("  meminfo ");
     vga_set_color(VGA_LIGHT_GREY, VGA_BLACK);
     vga_print("-- show memory info\n");
+    vga_set_color(VGA_LIGHT_CYAN, VGA_BLACK);
+    vga_print("  uptime  ");
+    vga_set_color(VGA_LIGHT_GREY, VGA_BLACK);
+    vga_print("-- show time since boot\n");
 }
 
 static void cmd_clear(void) {
@@ -78,6 +83,21 @@ static void cmd_echo(const char *args) {
         vga_putchar('\n');
     }
 }
+
+static void cmd_uptime(void) {
+    uint32_t secs  = pit_get_uptime();
+    uint32_t h     = secs / 3600;
+    uint32_t m     = (secs % 3600) / 60;
+    uint32_t s     = secs % 60;
+    vga_print("Uptime: ");
+    vga_print_num(h); vga_print("h ");
+    vga_print_num(m); vga_print("m ");
+    vga_print_num(s); vga_print("s  (");
+    vga_print_num(pit_get_ticks());
+    vga_print(" ticks)\n");
+}
+
+
 
 static void cmd_meminfo(void) {
     uint32_t free  = pmm_free_pages()  * 4;
@@ -122,6 +142,8 @@ static void parse_and_exec(void) {
         cmd_echo(args);
     else if (sh_strncmp(cmd, "meminfo", cmd_len) == 0 && cmd_len == 7)
         cmd_meminfo();
+    else if (sh_strncmp(cmd, "uptime",  cmd_len) == 0 && cmd_len == 6)
+        cmd_uptime();
     else {
         /* unknown command */
         vga_set_color(VGA_LIGHT_RED, VGA_BLACK);

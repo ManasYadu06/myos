@@ -2,6 +2,7 @@
 #include "idt.h"
 #include "vga.h"
 #include "keyboard.h"
+#include "pit.h"
 
 /* -----------------------------------------------------------------------
  * PIC I/O ports
@@ -140,6 +141,8 @@ void irq_handler(registers_t *regs) {
     outb(PIC1_CMD, PIC_EOI);
 
     /* per-IRQ dispatch */
+    if (regs->int_no == 32)
+        pit_handler();
     if (regs->int_no == 33)   /* IRQ1 — PS/2 keyboard */
         keyboard_handler(regs);
 
