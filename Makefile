@@ -21,7 +21,9 @@ OBJS    = boot/boot.o       \
           kernel/heap.o     \
           kernel/process.o  \
           kernel/scheduler.o\
-          kernel/context.o
+          kernel/context.o  \
+          kernel/syscall.o  \
+          kernel/syscall_stub.o
 
 
 .PHONY: all clean run iso
