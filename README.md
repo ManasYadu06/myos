@@ -21,16 +21,6 @@ A few edge cases to get right: backspace at the start of input does nothing. Buf
 
 Remaining phases to complete MyOS:
 
-Phase 9 — Process Scheduler
-
-
-kernel/process.h/c — PCB struct, task queue
-
-kernel/scheduler.h/c — round-robin switching via PIT IRQ0
-
-kernel/context.asm — save/restore registers on switch
-
-Update pit.c — trigger scheduler every N ticks
 
 Phase 10 — Syscall Interface
 
