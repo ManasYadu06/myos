@@ -1,4 +1,5 @@
 #include "pit.h"
+#include "scheduler.h"
 
 /* -----------------------------------------------------------------------
  * port I/O helpers — mirrors isr.c, no libc
@@ -45,6 +46,8 @@ void pit_init(void) {
  * ----------------------------------------------------------------------- */
 void pit_handler(void) {
     tick_count++;
+    if (tick_count % SCHED_TICKS == 0)
+        scheduler_tick();
 }
 
 /* -----------------------------------------------------------------------

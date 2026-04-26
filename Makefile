@@ -18,7 +18,10 @@ OBJS    = boot/boot.o       \
           kernel/pmm.o      \
           kernel/vmm.o      \
           kernel/pit.o      \
-          kernel/heap.o
+          kernel/heap.o     \
+          kernel/process.o  \
+          kernel/scheduler.o\
+          kernel/context.o
 
 
 .PHONY: all clean run iso
@@ -27,6 +30,10 @@ all: myos.bin
 
 boot/%.o: boot/%.asm
 	$(AS) -f elf32 $< -o $@
+
+kernel/%.o: kernel/%.asm
+	$(AS) -f elf32 $< -o $@
+
 
 kernel/%.o: kernel/%.c
 	$(CC) $(CFLAGS) -c $< -o $@

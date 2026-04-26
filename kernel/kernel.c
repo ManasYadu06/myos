@@ -6,7 +6,8 @@
 #include "pmm.h"
 #include "vmm.h"
 #include "heap.h"
-
+#include "process.h"
+#include "scheduler.h"
 
 void kernel_main(unsigned int magic, unsigned int mb_info) {
     (void)mb_info;
@@ -49,6 +50,12 @@ void kernel_main(unsigned int magic, unsigned int mb_info) {
 
     heap_init();
     vga_print("[OK] Kernel heap ready\n");
+
+    process_init();
+    vga_print("[OK] Process working\n");
+
+    scheduler_init();
+    vga_print("[OK] scheduler working\n");
 
     /* Multiboot magic check */
     if (magic == 0x2BADB002)
