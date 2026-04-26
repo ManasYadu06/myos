@@ -17,3 +17,47 @@ The shell is a blocking REPL. It halts with hlt waiting for the keyboard IRQ to 
 The physical memory manager is a bitmap allocator, one bit per 4 KB page, supporting up to 128 MB (32768 pages, 1024 u32 entries in the bitmap). Parse the Multiboot memory map to mark available regions free. Always mark page 0 as used for null pointer protection, and mark the pages covering the kernel (roughly 0x100000–0x200000) as reserved so nothing overwrites it. pmm_alloc_page returns the address of the first free page or null if exhausted. pmm_free_page marks a page free. Track total and used page counts so meminfo can report KB-level stats.
 
 A few edge cases to get right: backspace at the start of input does nothing. Buffer overflow at 256 chars drops silently. Out-of-memory from the PMM returns null without panicking. Double faults and page faults just print and halt like any other exception. Unhandled IRQs get EOI and nothing else. The GDT and IDT sizes (3 and 256 entries) are compile-time constants. No floating point, no paging, no user mode, no filesystem, no malloc beyond the page allocator, no libc at all.
+
+
+Remaining phases to complete MyOS:
+
+Phase 9 — Process Scheduler
+
+
+kernel/process.h/c — PCB struct, task queue
+
+kernel/scheduler.h/c — round-robin switching via PIT IRQ0
+
+kernel/context.asm — save/restore registers on switch
+
+Update pit.c — trigger scheduler every N ticks
+
+Phase 10 — Syscall Interface
+
+kernel/syscall.h/c — int 0x80 handler, syscall table
+
+Update idt.c — register int 0x80 as trap gate (0x8F)
+
+Commands: sys_write, sys_exit, sys_getpid
+
+Phase 11 — ELF Loader
+
+kernel/elf.h/c — parse ELF32 header, load segments into memory
+
+Requires VMM + heap already working ✓
+
+Phase 12 — VFS + Filesystem
+
+kernel/vfs.h/c — virtual filesystem interface
+
+kernel/initrd.h/c — initial ramdisk (simple file storage in memory)
+
+Shell commands: ls, cat, write
+
+Phase 13 — Userspace
+
+Separate user/kernel address spaces (VMM update)
+
+Ring 3 execution via iret with RPL=3
+
+Syscalls as the only kernel entry point
