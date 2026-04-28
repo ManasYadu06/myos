@@ -21,15 +21,6 @@ A few edge cases to get right: backspace at the start of input does nothing. Buf
 
 Remaining phases to complete MyOS:
 
-
-Phase 10 — Syscall Interface
-
-kernel/syscall.h/c — int 0x80 handler, syscall table
-
-Update idt.c — register int 0x80 as trap gate (0x8F)
-
-Commands: sys_write, sys_exit, sys_getpid
-
 Phase 11 — ELF Loader
 
 kernel/elf.h/c — parse ELF32 header, load segments into memory
